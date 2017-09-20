@@ -1,6 +1,8 @@
 database_url:
 mask:
   users:
-    email: 'email'
-    name: 'name'
+    email: :email
+    name: :name
     ssn:
+truncate:
+  bad_guys:
