@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'pg', '~> 0.21'
+gem 'faker', '~> 1.8'
 
 group :test do
   gem 'rspec', '~> 3.6.0'
