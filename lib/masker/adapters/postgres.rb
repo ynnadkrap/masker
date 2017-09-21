@@ -10,7 +10,7 @@ module Masker
         @tables_to_mask = config['mask']
         # TODO: figure out best way to pass in connection url
         @conn = PG::Connection.new(config['database_url'])
-        @parser = Parsers::Postgres.new(config, conn, opts)
+        @parser = ConfigParsers::Sql.new(config, conn, opts)
       end
 
       def mask

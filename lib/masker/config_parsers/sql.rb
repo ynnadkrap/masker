@@ -1,6 +1,6 @@
 module Masker
-  module Parsers
-    class Postgres
+  module ConfigParsers
+    class Sql
       def initialize(config, conn, opts = {})
         @config = config
         @tables_to_mask = config['mask']

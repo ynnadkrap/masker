@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Masker::Parsers::Postgres do
+describe ::Masker::ConfigParsers::Sql do
   let(:pg_mock) { instance_double(PG::Connection) }
   let(:config) { Configuration.load('spec/configurations/test.yml') }
   let(:subject) { described_class.new(config, pg_mock) }
