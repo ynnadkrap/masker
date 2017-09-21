@@ -21,7 +21,7 @@ module Masker
 
       def missing_tables
         tables.keys.each_with_object([]) do |table_name, missing_tables|
-          conn.exec("SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = #{table_name});") do |result|
+          conn.exec("SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = '#{table_name}');") do |result|
             missing_tables << table_name if result[0]['exists'] == 'f'
           end
         end
@@ -33,8 +33,8 @@ module Masker
             sql = <<~SQL
               SELECT EXISTS (
                 SELECT 1 FROM information_schema.columns
-                WHERE table_name=#{table_name}
-                AND column_name=#{column_name}
+                WHERE table_name='#{table_name}'
+                AND column_name='#{column_name}'
               );
             SQL
             conn.exec(sql) do |result|

@@ -1,0 +1,13 @@
+database_url:
+mask:
+  users:
+    name: :name
+    email: :email
+    ssn:
+  phones:
+    imei:
+    number: :phone
+    non_existing_column:
+  non_existing_table:
+    id:
+truncate: [addresses]

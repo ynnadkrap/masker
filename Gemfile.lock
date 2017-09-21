@@ -9,6 +9,8 @@ GEM
     i18n (0.8.6)
     method_source (0.8.2)
     pg (0.21.0)
+    pg_tester (0.1.0)
+      pg (~> 0.18, >= 0.18.2)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -37,6 +39,7 @@ PLATFORMS
 DEPENDENCIES
   faker (~> 1.8)
   pg (~> 0.21)
+  pg_tester
   pry (~> 0.10.4)
   pry-byebug
   rspec (~> 3.6.0)

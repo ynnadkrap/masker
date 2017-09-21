@@ -4,7 +4,6 @@ module Masker
   module Adapters
     class Postgres
       def initialize(config, logger, opts = {})
-        # TODO: figure out best way to pass in connection url
         @conn = PG::Connection.new(config['database_url'])
         @parser = ConfigParsers::Sql.new(config, conn, opts)
         @logger = logger
@@ -15,11 +14,11 @@ module Masker
         parser.remove_missing_tables
         parser.remove_missing_columns
         create_temp_tables
-        insert_fake_data_into_temp_table
+        insert_fake_data_into_temp_tables
         merge_tables
         truncate
       ensure
-        remove_temp_table
+        remove_temp_tables
       end
 
       private
@@ -32,7 +31,7 @@ module Masker
 
       def create_temp_tables
         tables.keys.each do |table_name|
-          connect.exec("CREATE TABLE temp_#{table_name} AS SELECT * FROM #{table_name} LIMIT 0;")
+          conn.exec("CREATE TABLE temp_#{table_name} AS SELECT * FROM #{table_name} LIMIT 0;")
         end
       end
 
@@ -52,7 +51,7 @@ module Masker
       end
 
       def create_fake_row(id, columns)
-        columns.map { |_, mask_type| DataGenerator.generate(mask_type) }
+        columns.map { |_, mask_type| %Q['#{DataGenerator.generate(mask_type)}'] }
           .unshift(id)
           .map { |x| x.nil? ? 'NULL' : x }
           .join(", ")
@@ -60,8 +59,8 @@ module Masker
 
       def merge_tables
         tables.each do |table, columns|
-          set_statement = columns.keys.map { |column| "#{column} = fake_#{table}.#{column}" }.join(", ")
-          conn.exec("UPDATE #{table} SET #{set_statement} FROM fake_#{table} WHERE #{table}.id = fake_#{table_name}.id;")
+          set_statement = columns.keys.map { |column| "#{column} = temp_#{table}.#{column}" }.join(", ")
+          conn.exec("UPDATE #{table} SET #{set_statement} FROM temp_#{table} WHERE #{table}.id = temp_#{table}.id;")
         end
       end
 
