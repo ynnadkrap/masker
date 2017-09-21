@@ -12,7 +12,7 @@ describe ::Masker::Adapters::Postgres do
 
     describe '#insert_fake_data_into_temp_tables' do
       before do
-        allow_any_instance_of(::Masker::Adapters::Postgres).to receive(:ids_to_mask).and_return({ 'users' => ['1'] })
+        allow_any_instance_of(::Masker::ConfigParsers::Sql).to receive(:ids_to_mask).and_return({ 'users' => ['1'] })
         expect(::DataGenerator).to receive(:generate).with(:name).and_return('Rick Sanchez')
         expect(::DataGenerator).to receive(:generate).with(:email).and_return('r@s.rm.com')
         expect(::DataGenerator).to receive(:generate).with(nil).and_call_original

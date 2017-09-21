@@ -4,5 +4,4 @@ mask:
     email: :email
     name: :name
     ssn:
-truncate:
-  bad_guys:
+truncate: [sensitive_table]
