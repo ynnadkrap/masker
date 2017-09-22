@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Masker::Configurations::Postgres do
+describe Masker::Configurations::Postgres do
   let(:pg_mock) { instance_double(PG::Connection) }
   let(:config_path) { 'spec/test.yml' }
   let(:logger) { double(:logger) }

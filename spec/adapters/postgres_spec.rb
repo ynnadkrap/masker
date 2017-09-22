@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'pg_tester'
 require 'postgres_fake'
 
-describe ::Masker::Adapters::Postgres do
+describe Masker::Adapters::Postgres do
   context 'with mock database' do
     let(:psql) { PgTester.new(database: 'test_db', user: 'test') }
 
@@ -41,7 +41,6 @@ describe ::Masker::Adapters::Postgres do
       end
 
       it '' do
-        binding.pry
         truncates_expected_tables
         removes_temp_tables
         does_not_mask_safe_ids

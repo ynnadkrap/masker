@@ -1,4 +1,4 @@
-module Masker
+class Masker
   module Configurations
     class Postgres
       attr_reader :tables

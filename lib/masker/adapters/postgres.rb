@@ -1,6 +1,4 @@
-require 'pg'
-
-module Masker
+class Masker
   module Adapters
     class Postgres
       def initialize(database_url, config_path, logger, opts = {})
@@ -51,7 +49,6 @@ module Masker
       end
 
       def create_fake_row(id, columns)
-        binding.pry
         columns.map { |_, mask_type| stringify(DataGenerator.generate(mask_type)) }
           .unshift(id)
           .join(", ")
