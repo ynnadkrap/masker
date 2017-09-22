@@ -1,10 +1,10 @@
 module Masker
-  module ConfigParsers
-    class Sql
+  module Configurations
+    class Postgres
       attr_reader :tables
 
-      def initialize(config, conn, opts = {})
-        @config = config
+      def initialize(conn, config_path, opts = {})
+        @config = Configuration.load(config_path)
         @conn = conn
         @opts = opts
         @tables = config['mask']
@@ -64,7 +64,7 @@ module Masker
 
       private
 
-      attr_reader :config, :conn, :opts
+      attr_reader :config, :opts, :conn
     end
   end
 end

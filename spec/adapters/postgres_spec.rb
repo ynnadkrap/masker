@@ -16,15 +16,7 @@ describe ::Masker::Adapters::Postgres do
 
     describe '#mask' do
       let(:safe_user_id) { 2 }
-      let(:config) do
-        config = Configuration.load('spec/configurations/postgres.yml')
-        config['database_url'] = {
-          dbname: psql.database,
-          port: psql.port,
-          host: psql.host
-        }
-        config
-      end
+      let(:config) { Configuration.load('spec/postgres.yml') }
       let(:opts) do
         {
           safe_ids: {
@@ -32,10 +24,17 @@ describe ::Masker::Adapters::Postgres do
           }
         }
       end
+      let(:db_url) do
+        {
+          dbname: psql.database,
+          port: psql.port,
+          host: psql.host
+        }
+      end
 
       before do
         PostgresFake.new(psql).setup
-        described_class.new(config, double(:logger), opts).mask
+        described_class.new(db_url, 'spec/postgres.yml', double(:logger), opts).mask
       end
 
       # TODO: test logging for remove_missing_tables/columns
@@ -83,33 +82,6 @@ describe ::Masker::Adapters::Postgres do
             end
           end
         end
-      end
-    end
-  end
-
-  # This isn't ideal, but the method being tested is somewhat complex and I'd like to guarantee it works
-  describe 'private_methods' do
-    let(:logger_mock) { double(:logger) }
-    let(:pg_mock) { instance_double(PG::Connection) }
-    let(:subject) { described_class.new(Configuration.load('spec/configurations/test.yml'), logger_mock) }
-
-    before do
-      expect(PG::Connection).to receive(:new).with(nil).and_return(pg_mock)
-    end
-
-    describe '#insert_fake_data_into_temp_tables' do
-      before do
-        allow_any_instance_of(::Masker::ConfigParsers::Sql).to receive(:ids_to_mask).and_return({ 'users' => ['1'] })
-        expect(::DataGenerator).to receive(:generate).with(:name).and_return('Rick Sanchez')
-        expect(::DataGenerator).to receive(:generate).with(:email).and_return('r@s.rm.com')
-        expect(::DataGenerator).to receive(:generate).with(nil).and_call_original
-        expect(pg_mock).to receive(:transaction).and_yield(pg_mock)
-        expect(pg_mock).to receive(:exec)
-          .with("INSERT INTO temp_users (id, email, name, ssn) VALUES (1, r@s.rm.com, Rick Sanchez, NULL);")
-      end
-
-      it 'inserts the fake data row into temp table' do
-        subject.send(:insert_fake_data_into_temp_tables)
       end
     end
   end

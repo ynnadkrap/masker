@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe ::Masker::ConfigParsers::Sql do
+describe ::Masker::Configurations::Postgres do
   let(:pg_mock) { instance_double(PG::Connection) }
-  let(:config) { Configuration.load('spec/configurations/test.yml') }
-  let(:subject) { described_class.new(config, pg_mock) }
+  let(:config_path) { 'spec/test.yml' }
+  let(:subject) { described_class.new(pg_mock, config_path) }
 
   describe '#missing_tables' do
     before do
-      expect(pg_mock).to receive(:exec).with(/tablename = users/).and_yield([{'exists' => 'f'}])
+      expect(pg_mock).to receive(:exec).with(/tablename = 'users'/).and_yield([{'exists' => 'f'}])
     end
 
     it 'returns an array of missing tables' do
@@ -17,9 +17,9 @@ describe ::Masker::ConfigParsers::Sql do
 
   describe '#missing_columns' do
     before do
-      expect(pg_mock).to receive(:exec).with(/column_name=email/).and_yield([{'exists' => 't'}])
-      expect(pg_mock).to receive(:exec).with(/column_name=name/).and_yield([{'exists' => 't'}])
-      expect(pg_mock).to receive(:exec).with(/column_name=ssn/).and_yield([{'exists' => 'f'}])
+      expect(pg_mock).to receive(:exec).with(/column_name='email'/).and_yield([{'exists' => 't'}])
+      expect(pg_mock).to receive(:exec).with(/column_name='name'/).and_yield([{'exists' => 't'}])
+      expect(pg_mock).to receive(:exec).with(/column_name='ssn'/).and_yield([{'exists' => 'f'}])
     end
 
     it 'returns a hash of tables and missing columns' do
@@ -46,7 +46,7 @@ describe ::Masker::ConfigParsers::Sql do
           }
         }
       end
-      let(:subject) { described_class.new(config, pg_mock, opts) }
+      let(:subject) { described_class.new(pg_mock, config_path, opts) }
 
       before do
         expect(pg_mock).to receive(:exec).with(/SELECT id FROM users/).and_yield(double(:result, values: [['1'], ['2']]))

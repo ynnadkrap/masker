@@ -3,16 +3,16 @@ require 'pg'
 module Masker
   module Adapters
     class Postgres
-      def initialize(config, logger, opts = {})
-        @conn = PG::Connection.new(config['database_url'])
-        @parser = ConfigParsers::Sql.new(config, conn, opts)
+      def initialize(database_url, config_path, logger, opts = {})
+        @conn = PG.connect(database_url)
+        @config = Configurations::Postgres.new(conn, config_path, opts)
         @logger = logger
       end
 
       def mask
         remove_temp_tables
-        parser.remove_missing_tables
-        parser.remove_missing_columns
+        config.remove_missing_tables
+        config.remove_missing_columns
         create_temp_tables
         insert_fake_data_into_temp_tables
         merge_tables
@@ -38,7 +38,7 @@ module Masker
       def insert_fake_data_into_temp_tables
         tables.each do |table, columns|
           conn.transaction do |conn|
-            parser.ids_to_mask[table].each_slice(1000) do |ids|
+            config.ids_to_mask[table].each_slice(1000) do |ids|
               fake_rows = create_fake_rows(ids, columns)
               conn.exec("INSERT INTO temp_#{table} (id, #{columns.keys.join(", ")}) VALUES #{fake_rows};")
             end
@@ -65,16 +65,16 @@ module Masker
       end
 
       def truncate
-        parser.tables_to_truncate.each do |table|
+        config.tables_to_truncate.each do |table|
           conn.exec("TRUNCATE #{table};")
         end
       end
 
       def tables
-        parser.tables
+        config.tables
       end
 
-      attr_reader :logger, :conn, :parser
+      attr_reader :logger, :config, :conn
     end
   end
 end

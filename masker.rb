@@ -1,10 +1,6 @@
-require 'masker/configuration'
-require 'masker/adapters/postgres'
-
 class Masker
-  def initialize(config_name, adapter, logger, opts)
-    config = Configuration.load(config_name)
-    @adapter = adapter.load(config, logger, opts)
+  def initialize(database_url:, config_path:, adapter: Adapters::Postgres.new, logger: NullObject.new, opts: {})
+    @adapter = adapter.load(database_url, config_path, logger, opts)
   end
 
   def mask
