@@ -3,10 +3,12 @@ require 'spec_helper'
 describe ::Masker::Configurations::Postgres do
   let(:pg_mock) { instance_double(PG::Connection) }
   let(:config_path) { 'spec/test.yml' }
-  let(:subject) { described_class.new(pg_mock, config_path) }
+  let(:logger) { double(:logger) }
+  let(:subject) { described_class.new(pg_mock, config_path, logger) }
 
   describe '#missing_tables' do
     before do
+      expect(logger).to receive(:warn).with(/Table: users exists in configuration but not in database/)
       expect(pg_mock).to receive(:exec).with(/tablename = 'users'/).and_yield([{'exists' => 'f'}])
     end
 
@@ -17,6 +19,7 @@ describe ::Masker::Configurations::Postgres do
 
   describe '#missing_columns' do
     before do
+      expect(logger).to receive(:warn).with(/Column: users:ssn exists in configuration but not in database/)
       expect(pg_mock).to receive(:exec).with(/column_name='email'/).and_yield([{'exists' => 't'}])
       expect(pg_mock).to receive(:exec).with(/column_name='name'/).and_yield([{'exists' => 't'}])
       expect(pg_mock).to receive(:exec).with(/column_name='ssn'/).and_yield([{'exists' => 'f'}])
@@ -46,7 +49,7 @@ describe ::Masker::Configurations::Postgres do
           }
         }
       end
-      let(:subject) { described_class.new(pg_mock, config_path, opts) }
+      let(:subject) { described_class.new(pg_mock, config_path, logger, opts) }
 
       before do
         expect(pg_mock).to receive(:exec).with(/SELECT id FROM users/).and_yield(double(:result, values: [['1'], ['2']]))

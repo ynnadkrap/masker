@@ -3,9 +3,10 @@ module Masker
     class Postgres
       attr_reader :tables
 
-      def initialize(conn, config_path, opts = {})
+      def initialize(conn, config_path, logger, opts = {})
         @config = Configuration.load(config_path)
         @conn = conn
+        @logger = logger
         @opts = opts
         @tables = config['mask']
       end
@@ -22,7 +23,10 @@ module Masker
       def missing_tables
         tables.keys.each_with_object([]) do |table_name, missing_tables|
           conn.exec("SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = '#{table_name}');") do |result|
-            missing_tables << table_name if result[0]['exists'] == 'f'
+            if result[0]['exists'] == 'f'
+              missing_tables << table_name
+              logger.warn "Table: #{table_name} exists in configuration but not in database."
+            end
           end
         end
       end
@@ -38,7 +42,10 @@ module Masker
               );
             SQL
             conn.exec(sql) do |result|
-              missing_columns[table_name] << column_name if result[0]['exists'] == 'f'
+              if result[0]['exists'] == 'f'
+                missing_columns[table_name] << column_name
+                logger.warn "Column: #{table_name}:#{column_name} exists in configuration but not in database."
+              end
             end
           end
         end
@@ -64,7 +71,7 @@ module Masker
 
       private
 
-      attr_reader :config, :opts, :conn
+      attr_reader :config, :opts, :conn, :logger
     end
   end
 end

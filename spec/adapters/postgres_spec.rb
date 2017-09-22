@@ -15,6 +15,7 @@ describe ::Masker::Adapters::Postgres do
     end
 
     describe '#mask' do
+      let(:logger) { double(:logger) }
       let(:safe_user_id) { 2 }
       let(:config) { Configuration.load('spec/postgres.yml') }
       let(:opts) do
@@ -34,11 +35,13 @@ describe ::Masker::Adapters::Postgres do
 
       before do
         PostgresFake.new(psql).setup
-        described_class.new(db_url, 'spec/postgres.yml', double(:logger), opts).mask
+        expect(logger).to receive(:warn).with(/Table: non_existing_table exists in configuration but not in database/)
+        expect(logger).to receive(:warn).with(/Column: phones:non_existing_column exists in configuration but not in database/)
+        described_class.new(db_url, 'spec/postgres.yml', logger, opts).mask
       end
 
-      # TODO: test logging for remove_missing_tables/columns
       it '' do
+        binding.pry
         truncates_expected_tables
         removes_temp_tables
         does_not_mask_safe_ids

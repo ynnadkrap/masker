@@ -2,7 +2,8 @@ mask:
   users:
     name: :name
     email: :email
-    ssn:
+    ssn: ''
+    address_id: :integer
   phones:
     imei:
     number: :phone

@@ -5,7 +5,7 @@ module Masker
     class Postgres
       def initialize(database_url, config_path, logger, opts = {})
         @conn = PG.connect(database_url)
-        @config = Configurations::Postgres.new(conn, config_path, opts)
+        @config = Configurations::Postgres.new(conn, config_path, logger, opts)
         @logger = logger
       end
 
@@ -51,10 +51,14 @@ module Masker
       end
 
       def create_fake_row(id, columns)
-        columns.map { |_, mask_type| %Q['#{DataGenerator.generate(mask_type)}'] }
+        binding.pry
+        columns.map { |_, mask_type| stringify(DataGenerator.generate(mask_type)) }
           .unshift(id)
-          .map { |x| x.nil? ? 'NULL' : x }
           .join(", ")
+      end
+
+      def stringify(value)
+        value.nil? ? 'NULL' : "'#{value}'"
       end
 
       def merge_tables
