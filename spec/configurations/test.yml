@@ -1,6 +1,0 @@
-database_url:
-mask:
-  users:
-    email: 'email'
-    name: 'name'
-    ssn:
