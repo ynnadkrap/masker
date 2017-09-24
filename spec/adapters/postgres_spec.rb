@@ -37,6 +37,8 @@ describe Masker::Adapters::Postgres do
         PostgresFake.new(psql).setup
         expect(logger).to receive(:warn).with(/Table: non_existing_table exists in configuration but not in database/)
         expect(logger).to receive(:warn).with(/Column: phones:non_existing_column exists in configuration but not in database/)
+        expect(logger).to receive(:info).with(/Masking/).at_least(:once)
+        expect(logger).to receive(:info).with(/Truncating addresses/)
         described_class.new(db_url, 'spec/postgres.yml', logger, opts).mask
       end
 

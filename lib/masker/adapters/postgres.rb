@@ -35,6 +35,7 @@ class Masker
 
       def insert_fake_data_into_temp_tables
         tables.each do |table, columns|
+          logger.info "Masking #{table}..."
           conn.transaction do |conn|
             config.ids_to_mask[table].each_slice(1000) do |ids|
               fake_rows = create_fake_rows(ids, columns)
@@ -55,7 +56,7 @@ class Masker
       end
 
       def stringify(value)
-        value.nil? ? 'NULL' : "'#{value}'"
+        value.nil? ? 'NULL' : "'#{conn.escape_string(value.to_s)}'"
       end
 
       def merge_tables
@@ -67,6 +68,7 @@ class Masker
 
       def truncate
         config.tables_to_truncate.each do |table|
+          logger.info "Truncating #{table}..."
           conn.exec("TRUNCATE #{table};")
         end
       end
